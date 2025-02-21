@@ -11,6 +11,7 @@
         ></v-radio>
       </v-radio-group>
       <p class="text-caption">Time remaining: {{ timeRemaining }} seconds</p>
+      <p>{{ question.answer }}</p>
     </v-card-text>
     <v-card-actions>
       <v-btn @click="submitAnswer" color="primary" :disabled="!selectedAnswer">

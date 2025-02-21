@@ -81,7 +81,6 @@ export default {
       examAttemptId: null,
       listeningToAudioCount: 0,
       audioListeningCount: 0,
-      answerSubmitted: false,
       audioEnded: false,
     };
   },
@@ -187,7 +186,7 @@ export default {
       this.fetchNextQuestion();
     },
     async handleTimeUp() {
-      if (!this.examCompleted && !this.answerSubmitted) {
+      if (!this.examCompleted) {
         await this.submitAnswer('');
       }
       this.fetchNextQuestion();
@@ -205,27 +204,21 @@ export default {
         this.listeningToAudioCount = this.currentQuestion?.exam?.listening_to_audio_count;
         this.audioListeningCount = this.currentQuestion?.exam?.audio_listening_count;
         this.questionNumber = this.currentQuestion?.exam?.question_number;
-        this.answerSubmitted = true;
       } catch (error) {
         console.error('Error on submit answer:', error);
       }
     },
     async fetchNextQuestion() {
-      if (this.isAudioLevel && this.listeningToAudio && this.listeningToAudioCount < this.audioListeningCount) {
-        this.checkAudioLevel();
-      } else {
         if (this.questionNumber < this.totalQuestions && !this.examCompleted) {
           const response = await axios.post(`${this.baseUrl}/exams/get-question/${this.currentQuestion.exam_attempt_id}${this.urlData}`);
           this.currentQuestion = response.data.data;
           this.questionDuration = this.currentQuestion.question_duration;
           this.questionNumber = this.currentQuestion?.exam?.question_number;
-          this.answerSubmitted = false;
         } else {
           if (!this.examCompleted) {
             this.evaluateExam();
           }
         }
-      }
     },
     async evaluateExam() {
       const response = await axios.post(`${this.baseUrl}/exams/evaluate-exam/${this.currentQuestion.exam_attempt_id}${this.urlData}`);
