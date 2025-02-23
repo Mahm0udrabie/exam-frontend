@@ -19,7 +19,7 @@
           <v-list-item-title>Total Questions</v-list-item-title>
           <v-list-item-subtitle>{{ results?.total_questions }}</v-list-item-subtitle>
         </v-list-item>
-        <v-list-item>
+        <v-list-item v-if="results?.exam?.level == 'placement'">
           <v-list-item-title>Level</v-list-item-title>
           <v-list-item-subtitle>{{ results?.level }}</v-list-item-subtitle>
         </v-list-item>

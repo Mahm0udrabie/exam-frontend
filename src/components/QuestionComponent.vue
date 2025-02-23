@@ -10,7 +10,7 @@
           :value="option"
         ></v-radio>
       </v-radio-group>
-      <p class="text-caption">Time remaining: {{ timeRemaining }} seconds</p>
+      <p class="text-caption">Time remaining: {{ timeRemaining }} seconds {{ question.question_duration }}</p>
       <p>{{ question.answer }}</p>
     </v-card-text>
     <v-card-actions>
@@ -27,13 +27,19 @@ export default {
   data() {
     return {
       selectedAnswer: '',
-      timeRemaining: this.duration,
+      timeRemaining: 0, // Initialize to 0, it will be set in watch
       timer: null,
     };
   },
   watch: {
-    duration() {
-      this.resetTimer();
+    question: {
+      immediate: true, // Ensures the timer starts when the component mounts
+      handler(newQuestion) {
+        if (newQuestion) {
+          this.timeRemaining = this.duration; // Reset time when question changes
+          this.resetTimer();
+        }
+      },
     },
   },
   mounted() {
@@ -41,7 +47,7 @@ export default {
   },
   methods: {
     startTimer() {
-      this.timeRemaining = this.duration;
+      clearInterval(this.timer); // Clear any existing timer
       this.timer = setInterval(() => {
         if (this.timeRemaining > 0) {
           this.timeRemaining--;
