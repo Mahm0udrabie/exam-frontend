@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="$route.query.exam_type && $route.query.student_id">
+  <v-container>
     <v-row justify="center">
       <v-col cols="12" md="8">
         <v-card class="pa-6">
@@ -31,11 +31,12 @@
               @proceed-to-question="handleProceedToQuestion"
             />
             <QuestionComponent
-              v-if="!examConfig?.is_audio_level || audioCompleted"
+              v-if="(!examConfig?.is_audio_level || audioCompleted)"
               :question="examQuestion"
-              :duration="examQuestion.question_duration || 8"
+              :duration="examQuestion?.question_duration || 7"
               @answer="handleAnswer"
               @time-up="handleTimeUp"
+              @update-audio-completed="updateAudioCompleted"
             />
             <CounterComponent :current="examConfig?.question_number" :total="examConfig?.questions_count" />
             <EvaluationComponent v-if="examCompleted" :results="evaluationResults" />
@@ -71,12 +72,11 @@ export default {
       audioFile: null,
       evaluationResults: null,
       urlData: null,
+      examCompleted:false,
     };
   },
   created() {
-    console.log(this.$route.query)
-
-    this.urlData = `?exam_type=${this.$route.query.exam_type}&expires=${this.$route.query.expires}&student_id=${this.$route.query.student_id}&signature=${this.$route.query.signature}&exam_attempt_id=${this.examAttemptId}`;
+    this.urlData = `?exam_type=${this.$route.query.exam_type}&expires=${this.$route.query.expires}&student_id=${this.$route.query.student_id}&signature=${this.$route.query.signature}&exam_attempt_id=${this.examConfig?.exam_attempt_id}`;
   },
   watch: {
     examConfig: {
@@ -100,7 +100,6 @@ export default {
       axios.get(`${this.baseUrl}/exams/get-audio/${this.examConfig?.exam_attempt_id}${this.urlData}`
       ).then((response) => {
         this.audioFile = response.data.data.audio_file;
-        this.examConfig = response.data.data.exam;
       }).catch((error) => {
         console.error('Error getting audio file:', error);
       });
@@ -108,14 +107,21 @@ export default {
     startExam() {
       this.examStarted = true;
       this.loading = true;
+     
 
       axios.post(`${this.baseUrl}/exams/start`, {
           exam_type: this.$route.query.exam_type,
           student_id: this.$route.query.student_id
       }).then((response) => {
         this.examConfig = response.data.data.exam;
-        this.examQuestion = response.data.data;
-        this.loading = false;
+        if (this.examConfig?.question_number == this.examConfig?.questions_count) {
+          this.examCompleted = true;
+          this.loading = false;
+          return;
+        } else {
+          this.examQuestion = response.data.data;
+          this.loading = false;
+        }
       }).catch((error) => {
         console.error('Error starting exam:', error);
         this.loading = false;
@@ -141,7 +147,6 @@ export default {
     getNextQuestion() {
       if (this.examConfig?.question_number < this.examConfig?.questions_count) {
 
-
         axios.post(`${this.baseUrl}/exams/get-question/${this.examConfig?.exam_attempt_id}${this.urlData}`).then((response) => {
           this.examConfig = response.data.data.exam;
           this.examQuestion = response.data.data;
@@ -150,12 +155,12 @@ export default {
         });
       }
       else {
-        this.examCompleted = true;
-        this.getEvaluationResults
+        this.evaluateExam()
       }
     },
-    getEvaluationResults() {
-      axios.get(`${this.baseUrl}/exams/evaluation-exam/${this.examConfig?.exam_attempt_id}${this.urlData}`).then((response) => {
+    evaluateExam() {
+      axios.post(`${this.baseUrl}/exams/evaluate-exam/${this.examConfig?.exam_attempt_id}${this.urlData}`).then((response) => {
+        console.log(response.data.data?.score)
         this.evaluationResults = response.data.data;
       }).catch((error) => {
         console.error('Error getting evaluation results:', error);
