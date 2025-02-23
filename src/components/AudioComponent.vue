@@ -54,6 +54,7 @@ export default {
       if (audio) {
         audio.currentTime = 0;
         audio.play();
+        this.currentAudioListeningCount++;
       }
     },
     handleProceedToQuestion() {
