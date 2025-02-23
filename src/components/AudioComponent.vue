@@ -8,10 +8,11 @@
       controls
       controlsList="nodownload noplaybackrate"
       class="mb-4"
+      ref="audioPlayer"
     ></audio>
     <div>
       <v-btn
-        v-if="listeningToAudio"
+        v-if="!audioEnded"
         @click="handleReplayAudio"
         color="primary"
         class="mr-2"
@@ -32,21 +33,28 @@
 export default {
   props: {
     audioFile: String,
-    listeningToAudio: Boolean,
+    audioListeningCount: Number,
   },
   data() {
     return {
       audioEnded: false,
+      currentAudioListeningCount: 0,
     };
   },
   methods: {
     handleAudioEnded() {
-      this.audioEnded = true;
-      this.$emit('audio-ended');
+      this.currentAudioListeningCount++;
+      if (this.currentAudioListeningCount >= this.audioListeningCount) { 
+        this.audioEnded = true;
+        this.$emit('audio-ended');
+      }
     },
     handleReplayAudio() {
-      this.audioEnded = false;
-      this.$emit('replay-audio');
+      const audio = this.$refs.audioPlayer;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play();
+      }
     },
     handleProceedToQuestion() {
       this.$emit('proceed-to-question');

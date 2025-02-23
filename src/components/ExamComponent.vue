@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="examType && studentId">
+  <v-container>
     <v-row justify="center">
       <v-col cols="12" md="8">
         <v-card class="pa-6">
@@ -22,21 +22,23 @@
           </v-btn>
           <div v-if="examStarted && !loading">
             <AudioComponent
-              v-if="isAudioLevel && !audioCompleted"
+              v-if="examConfig?.is_audio_level && !audioCompleted"
               :audioFile="audioFile"
               :listeningToAudio="listeningToAudio"
+              :audioListeningCount="examConfig?.audio_listening_count"
               @audio-ended="handleAudioEnded"
               @replay-audio="handleReplayAudio"
               @proceed-to-question="handleProceedToQuestion"
             />
             <QuestionComponent
-              v-if="!isAudioLevel || audioCompleted"
-              :question="currentQuestion"
-              :duration="questionDuration"
+              v-if="(!examConfig?.is_audio_level || audioCompleted)"
+              :question="examQuestion"
+              :duration="examQuestion?.question_duration || 7"
               @answer="handleAnswer"
               @time-up="handleTimeUp"
+              @update-audio-completed="updateAudioCompleted"
             />
-            <CounterComponent :current="questionNumber" :total="totalQuestions" />
+            <CounterComponent :current="examConfig?.question_number" :total="examConfig?.questions_count" />
             <EvaluationComponent v-if="examCompleted" :results="evaluationResults" />
           </div>
         </v-card>
@@ -61,170 +63,110 @@ export default {
   },
   data() {
     return {
-      examStarted: false,
-      isQuestionsAnswered: false,
-      currentQuestion: null,
-      questionNumber: 0,
-      totalQuestions: 100,
-      examCompleted: false,
-      evaluationResults: null,
-      isAudioLevel: false,
-      audioFile: '',
-      audioCompleted: false,
-      listeningToAudio: false,
-      questionDuration: 7,
-      loading: false,
       baseUrl: 'http://ftcourses.test/api',
-      studentId: null,
-      examType: null,
-      urlData: null,
+      loading: false,
       examAttemptId: null,
-      listeningToAudioCount: 0,
-      audioListeningCount: 0,
-      audioEnded: false,
+      examStarted: false,
+      examConfig: null,
+      examQuestion: null,
+      audioFile: null,
+      evaluationResults: null,
+      urlData: null,
+      examCompleted:false,
     };
   },
+  created() {
+    this.urlData = `?exam_type=${this.$route.query.exam_type}&expires=${this.$route.query.expires}&student_id=${this.$route.query.student_id}&signature=${this.$route.query.signature}&exam_attempt_id=${this.examConfig?.exam_attempt_id}`;
+  },
   watch: {
-    audioCompleted: {
+    examConfig: {
       immediate: true,
       deep: true,
-      handler(newValue) {
-        if (newValue) {
-          if (this.audioListeningCount === this.listeningToAudioCount) {
-            this.fetchNextQuestion();
-          }
+      handler() {
+        if(this.examConfig?.is_audio_level) { 
+          this.getAudioFile()
         }
-      },
-    },
-  },
-  created() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const studentId = urlParams.get('student_id');
-    const examType = urlParams.get('exam_type');
-    this.studentId = studentId;
-    this.examType = examType;
-    this.getExamSettings();
+      }
+    }
   },
   methods: {
-    async getExamSettings() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const examType = urlParams.get('exam_type');
-      try {
-        const examSettings = await axios.get(`${this.baseUrl}/exams/get-exam-settings/${examType}`);
-        this.totalQuestions = examSettings.data.data?.questions_count;
-        this.audioListeningCount = examSettings.data.data?.audio_listening_count;
-      } catch (error) {
-        console.error('Error starting exam:', error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async startExam() {
-      this.loading = true;
-      const urlParams = new URLSearchParams(window.location.search);
-      const studentId = urlParams.get('student_id');
-      const examType = urlParams.get('exam_type');
-      const expires = urlParams.get('expires');
-      const signature = urlParams.get('signature');
-      this.studentId = studentId;
-      this.examType = examType;
-      try {
-        const response = await axios.post(`${this.baseUrl}/exams/start`, {
-          student_id: studentId,
-          exam_type: examType,
-        });
-        this.currentQuestion = response.data.data;
-        this.questionDuration = this.currentQuestion.question_duration;
-        this.examStarted = true;
-        this.examAttemptId = this.currentQuestion.exam_attempt_id;
-        this.questionNumber = this.currentQuestion?.exam?.question_number;
-        this.isAudioLevel = this.currentQuestion?.exam?.is_audio_level;
-        this.listeningToAudio = this.currentQuestion?.exam?.listening_to_audio;
-        this.listeningToAudioCount = this.currentQuestion?.exam?.listening_to_audio_count;
-        this.audioListeningCount = this.currentQuestion?.exam?.audio_listening_count;
-        this.urlData = `?exam_type=${examType}&expires=${expires}&student_id=${studentId}&signature=${signature}&exam_attempt_id=${this.examAttemptId}`;
-        if (this.isAudioLevel) {
-          this.checkAudioLevel();
-        }
-      } catch (error) {
-        console.error('Error starting exam:', error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async checkAudioLevel() {
-      const audioResponse = await axios.get(`${this.baseUrl}/exams/get-audio/${this.examAttemptId}${this.urlData}`);
-      this.audioFile = audioResponse.data.data.audio_file;
-      this.listeningToAudio = audioResponse.data.data.listening_to_audio;
-      this.listeningToAudioCount = audioResponse.data.data.exam.listening_to_audio_count;
-    },
     handleAudioEnded() {
-      this.audioCompleted = true;
-    },
-    handleReplayAudio() {
-      if (this.listeningToAudioCount < this.audioListeningCount) {
-        this.listeningToAudioCount++;
-        this.audioCompleted = false;
-      } else {
-        this.audioCompleted = true;
-      }
+      this.getNextQuestion()
     },
     handleProceedToQuestion() {
-      if (this.listeningToAudioCount < this.audioListeningCount) {
-        this.listeningToAudioCount++;
-        this.audioCompleted = false;
-      } else {
-        this.audioCompleted = true;
-      }
+      this.getNextQuestion()
     },
-    async handleAnswer(answer) {
+    getAudioFile() {
+      axios.get(`${this.baseUrl}/exams/get-audio/${this.examConfig?.exam_attempt_id}${this.urlData}`
+      ).then((response) => {
+        this.audioFile = response.data.data.audio_file;
+      }).catch((error) => {
+        console.error('Error getting audio file:', error);
+      });
+    },
+    startExam() {
+      this.examStarted = true;
       this.loading = true;
-      if (!this.examCompleted) {
-        await this.submitAnswer(answer);
-      }
-      this.loading = false;
-      this.fetchNextQuestion();
-    },
-    async handleTimeUp() {
-      if (!this.examCompleted) {
-        await this.submitAnswer('');
-      }
-      this.fetchNextQuestion();
-    },
-    async submitAnswer(answer) {
-      try {
-        const response = await axios.post(`${this.baseUrl}/exams/submit-answer${this.urlData}`, {
-          exam_attempt_id: this.currentQuestion.exam_attempt_id,
-          question_id: this.currentQuestion.id,
-          answer: answer,
-        });
-        this.examData = response.data.data.exam;
-        this.isAudioLevel = this.currentQuestion?.exam?.is_audio_level;
-        this.listeningToAudio = this.currentQuestion?.exam?.listening_to_audio;
-        this.listeningToAudioCount = this.currentQuestion?.exam?.listening_to_audio_count;
-        this.audioListeningCount = this.currentQuestion?.exam?.audio_listening_count;
-        this.questionNumber = this.currentQuestion?.exam?.question_number;
-      } catch (error) {
-        console.error('Error on submit answer:', error);
-      }
-    },
-    async fetchNextQuestion() {
-        if (this.questionNumber < this.totalQuestions && !this.examCompleted) {
-          const response = await axios.post(`${this.baseUrl}/exams/get-question/${this.currentQuestion.exam_attempt_id}${this.urlData}`);
-          this.currentQuestion = response.data.data;
-          this.questionDuration = this.currentQuestion.question_duration;
-          this.questionNumber = this.currentQuestion?.exam?.question_number;
+     
+
+      axios.post(`${this.baseUrl}/exams/start`, {
+          exam_type: this.$route.query.exam_type,
+          student_id: this.$route.query.student_id
+      }).then((response) => {
+        this.examConfig = response.data.data.exam;
+        if (this.examConfig?.question_number == this.examConfig?.questions_count) {
+          this.examCompleted = true;
+          this.loading = false;
+          return;
         } else {
-          if (!this.examCompleted) {
-            this.evaluateExam();
-          }
+          this.examQuestion = response.data.data;
+          this.loading = false;
         }
+      }).catch((error) => {
+        console.error('Error starting exam:', error);
+        this.loading = false;
+      });
     },
-    async evaluateExam() {
-      const response = await axios.post(`${this.baseUrl}/exams/evaluate-exam/${this.currentQuestion.exam_attempt_id}${this.urlData}`);
-      this.evaluationResults = response.data.data;
-      this.examCompleted = true;
+    handleAnswer(answer) {
+
+      axios.post(`${this.baseUrl}/exams/submit-answer${this.urlData}`,
+        {
+          answer: answer,
+          question_id: this.examQuestion.id,
+          exam_attempt_id: this.examConfig?.exam_attempt_id
+        }).then((response) => {
+        this.examConfig = response.data.data.exam;
+        this.getNextQuestion()
+      }).catch((error) => {
+        console.error('Error submitting answer:', error);
+      });
     },
-  },
+    handleTimeUp() {
+      this.handleAnswer('')
+    },
+    getNextQuestion() {
+      if (this.examConfig?.question_number < this.examConfig?.questions_count) {
+
+        axios.post(`${this.baseUrl}/exams/get-question/${this.examConfig?.exam_attempt_id}${this.urlData}`).then((response) => {
+          this.examConfig = response.data.data.exam;
+          this.examQuestion = response.data.data;
+        }).catch((error) => {
+          console.error('Error getting next question:', error);
+        });
+      }
+      else {
+        this.evaluateExam()
+      }
+    },
+    evaluateExam() {
+      axios.post(`${this.baseUrl}/exams/evaluate-exam/${this.examConfig?.exam_attempt_id}${this.urlData}`).then((response) => {
+        console.log(response.data.data?.score)
+        this.evaluationResults = response.data.data;
+      }).catch((error) => {
+        console.error('Error getting evaluation results:', error);
+      });
+    }
+  }
+
 };
 </script>

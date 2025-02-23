@@ -41,6 +41,7 @@ export default {
   },
   methods: {
     startTimer() {
+      this.timeRemaining = this.duration;
       this.timer = setInterval(() => {
         if (this.timeRemaining > 0) {
           this.timeRemaining--;
@@ -52,11 +53,10 @@ export default {
     },
     resetTimer() {
       clearInterval(this.timer);
-      this.timeRemaining = this.duration;
-      this.selectedAnswer = ''; // Reset selected answer
       this.startTimer();
     },
     submitAnswer() {
+      clearInterval(this.timer);
       this.$emit('answer', this.selectedAnswer);
     },
   },
