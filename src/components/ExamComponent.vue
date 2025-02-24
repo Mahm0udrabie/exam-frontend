@@ -71,7 +71,7 @@ export default {
   },
   data() {
     return {
-      baseUrl: 'http://ftcourses.test/api',
+      baseUrl: 'ftcourses.com/api',
       loading: false,
       examStarted: false,
       examConfig: null,
