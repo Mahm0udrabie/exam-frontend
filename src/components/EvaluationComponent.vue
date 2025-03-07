@@ -1,109 +1,102 @@
 <template>
-  <v-scale-transition>
-    <v-card class="evaluation-card mx-auto my-4" max-width="800">
-      <!-- Score circle -->
-      <v-card-text class="text-center pt-6">
-        <v-progress-circular
-          :value="(results?.score || 0)"
-          :color="getScoreColor"
-          size="150"
-          width="15"
+  <div class="evaluation-container">
+    <v-card class="evaluation-card" elevation="2">
+      <div class="text-center pa-4 pa-sm-6">
+        <v-icon 
+          :size="$vuetify.breakpoint.xsOnly ? 48 : 64"
+          :color="results.passed ? 'success' : 'error'"
+          class="mb-4"
         >
-          <div class="text-h4">{{ results?.score }}%</div>
-        </v-progress-circular>
-      </v-card-text>
+          {{ results.passed ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+        </v-icon>
+        <h2 class="text-h5 text-sm-h4 mb-2">{{ results.passed ? 'Congratulations!' : 'Keep Practicing!' }}</h2>
+        <p class="text-subtitle-2 text-sm-subtitle-1 grey--text">
+          {{ results.passed ? 'You have successfully passed the exam.' : 'You did not pass this time.' }}
+        </p>
+      </div>
 
-      <!-- Detailed results -->
-      <v-card-text class="pt-4">
-        <v-row justify="center" align="center">
-          <v-col cols="12" sm="6">
-            <v-card outlined class="stat-card mb-4">
-              <v-card-text>
-                <div class="text-center">
-                  <div class="text-h6 success--text">
-                    <v-icon color="success">mdi-check</v-icon>
-                    Correct Answers
-                  </div>
-                  <div class="text-h3 font-weight-bold">
-                    {{ results?.correct_answers }}
-                  </div>
-                  <div class="caption grey--text">
-                    out of {{ results?.total_questions }} questions
-                  </div>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
+      <v-divider></v-divider>
 
-          <v-col cols="12" sm="6" v-if="results?.exam?.level === 'placement'">
-            <v-card outlined class="stat-card mb-4">
-              <v-card-text>
-                <div class="text-center">
-                  <div class="text-h6 primary--text">
-                    <v-icon color="primary">mdi-stairs</v-icon>
-                    Achieved Level
-                  </div>
-                  <div class="text-h3 font-weight-bold">
-                    {{ formatLevel(results?.level) }}
-                  </div>
-                  <div class="caption grey--text">
-                    Your placement result
-                  </div>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+      <v-list class="py-0">
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-bold text-body-2 text-sm-body-1">Score</v-list-item-title>
+            <v-list-item-subtitle class="text-body-2">{{ results.score }}%</v-list-item-subtitle>
+          </v-list-item-content>
+          <v-list-item-action>
+            <v-chip
+              :color="results.passed ? 'success' : 'error'"
+              text-color="white"
+              x-small
+              class="font-weight-medium"
+            >
+              {{ results.passed ? 'PASSED' : 'FAILED' }}
+            </v-chip>
+          </v-list-item-action>
+        </v-list-item>
 
-        <!-- Performance breakdown -->
-        <v-card outlined class="mt-4">
-          <v-card-title class="text-h6">
-            <v-icon left>mdi-chart-bar</v-icon>
-            Performance Breakdown
-          </v-card-title>
-          <v-card-text>
-            <v-list dense>
-              <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-title class="d-flex align-center">
-                    Accuracy Rate
-                    <v-spacer></v-spacer>
-                    <span class="font-weight-bold">
-                      {{ calculateAccuracy(results?.correct_answers, results?.total_questions) }}%
-                    </span>
-                  </v-list-item-title>
-                  <v-progress-linear
-                    :value="calculateAccuracy(results?.correct_answers, results?.total_questions)"
-                    height="8"
-                    rounded
-                    color="success"
-                    class="mt-2"
-                  ></v-progress-linear>
-                </v-list-item-content>
-              </v-list-item>
+        <v-list-item v-if="results.exam">
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-bold text-body-2 text-sm-body-1">Required Score</v-list-item-title>
+            <v-list-item-subtitle class="text-body-2">{{ results.exam.passing_score }}%</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
 
-              <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-title class="d-flex align-center">
-                    Completion Rate
-                    <v-spacer></v-spacer>
-                    <span class="font-weight-bold">100%</span>
-                  </v-list-item-title>
-                  <v-progress-linear
-                    value="100"
-                    height="8"
-                    rounded
-                    color="info"
-                    class="mt-2"
-                  ></v-progress-linear>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-card-text>
+        <v-list-item v-if="results.exam && !results.passed">
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-bold text-body-2 text-sm-body-1">Attempts</v-list-item-title>
+            <v-list-item-subtitle class="text-body-2">
+              {{ results.exam.current_attempts }} of {{ results.exam.max_attempts }}
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+
+      <v-divider></v-divider>
+
+      <div class="text-center pa-4 pa-sm-6">
+        <div v-if="!results.passed && canRetake" class="mb-4">
+          <v-btn
+            color="primary"
+            :large="!$vuetify.breakpoint.xsOnly"
+            :block="$vuetify.breakpoint.xsOnly"
+            @click="retakeExam"
+            :loading="loading"
+            min-width="200"
+            class="mb-2"
+          >
+            <v-icon left>mdi-refresh</v-icon>
+            Retake Exam
+          </v-btn>
+          <p class="caption grey--text">
+            You have {{ remainingAttempts }} attempts remaining
+          </p>
+        </div>
+
+        <div v-if="!results.passed && !canRetake && results.exam?.max_attempts" class="mb-4">
+          <v-alert
+            type="warning"
+            text
+            dense
+            class="text-caption text-sm-body-2"
+          >
+            You have reached the maximum number of attempts for this exam.
+          </v-alert>
+        </div>
+
+        <v-btn
+          text
+          color="grey"
+          @click="goHome"
+          :block="$vuetify.breakpoint.xsOnly"
+          class="mt-2"
+        >
+          <v-icon left>mdi-home</v-icon>
+          Return to Home
+        </v-btn>
+      </div>
     </v-card>
-  </v-scale-transition>
+  </div>
 </template>
 
 <script>
@@ -114,54 +107,85 @@ export default {
       required: true
     }
   },
-  computed: {
-    getScoreColor() {
-      const score = this.results?.score || 0;
-      if (score >= 80) return 'success';
-      if (score >= 60) return 'warning';
-      return 'error';
-    },
+
+  data() {
+    return {
+      loading: false
+    }
   },
-  methods: {
-    calculateAccuracy(correct, total) {
-      if (!correct || !total) return 0;
-      return Math.round((correct / total) * 100);
+
+  computed: {
+    canRetake() {
+      if (!this.results.exam) return false;
+      return (
+        !this.results.passed &&
+        this.results.exam.allow_retake &&
+        this.results.exam.current_attempts < this.results.exam.max_attempts
+      );
     },
-    formatLevel(level) {
-      if (!level) return 'N/A';
-      return level.charAt(0).toUpperCase() + level.slice(1);
+    remainingAttempts() {
+      if (!this.results.exam) return 0;
+      return this.results.exam.max_attempts - this.results.exam.current_attempts;
+    }
+  },
+
+  methods: {
+    retakeExam() {
+      this.loading = true;
+      // Emit event to parent to handle retake
+      this.$emit('retake');
+    },
+    goHome() {
+      this.$router.push('/');
     }
   }
-};
+}
 </script>
 
 <style scoped>
-.evaluation-card {
-  transition: all 0.3s ease;
-}
-
-.evaluation-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
-}
-
-.stat-card {
-  transition: all 0.2s ease;
-  border-radius: 8px;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-}
-
-/* Ensure proper spacing in list items */
-.v-list-item {
+.evaluation-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
   padding: 16px;
 }
 
-/* Add some depth to progress bars */
-.v-progress-linear {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+.evaluation-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.v-list-item {
+  min-height: 48px;
+  padding: 8px 16px;
+}
+
+@media (max-width: 600px) {
+  .evaluation-container {
+    padding: 8px;
+  }
+
+  .v-list-item {
+    min-height: 40px;
+    padding: 4px 16px;
+  }
+}
+
+/* Transition animations */
+.v-btn {
+  transition: all 0.3s ease;
+}
+
+.v-btn:not(.v-btn--block):hover {
+  transform: translateY(-2px);
+}
+
+.v-chip {
+  transition: all 0.3s ease;
+}
+
+.v-chip:hover {
+  opacity: 0.9;
 }
 </style>

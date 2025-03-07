@@ -1,20 +1,20 @@
 <template>
-  <v-container v-if="$route.query.exam_type && $route.query.student_id" >
-    <v-row align="center" justify="center">
-      <v-col cols="auto" >
-        <v-card class="pa-6" >
+  <v-container v-if="$route.query.exam_type && $route.query.student_id" class="pa-0 pa-sm-3">
+    <v-row align="center" justify="center" class="ma-0">
+      <v-col cols="12" sm="11" md="10" lg="8" xl="6" class="pa-0 pa-sm-2">
+        <v-card class="exam-card">
           <!-- Loader -->
           <v-progress-circular
             v-if="loading"
             indeterminate
             color="primary"
             size="64"
-            class="mx-auto"
+            class="ma-8"
           ></v-progress-circular>
 
-          <div v-if="!examStarted && !loading" class="start-exam-content pa-8">
-            <v-icon size="64" color="primary" class="mb-4">mdi-book-open-variant</v-icon>
-            <h1 class="text-h4 mb-4">Online English Exam</h1>
+          <div v-if="!examStarted && !loading" class="start-exam-content pa-4 pa-sm-8">
+            <v-icon size="48" color="primary" class="mb-4">mdi-book-open-variant</v-icon>
+            <h1 class="text-h4 text-sm-h3 mb-4">Online English Exam</h1>
             <div class="exam-description mb-6">
               <p class="text-body-1 mb-3">Welcome to the English Proficiency Test</p>
               <v-card class="info-card mb-4" flat>
@@ -22,15 +22,15 @@
                   <v-list-item-content>
                     <div class="exam-info-item">
                       <v-icon small color="primary" class="mr-2">mdi-clock-outline</v-icon>
-                      <span>Duration: Multiple timed questions</span>
+                      <span class="info-text">Duration: Multiple timed questions</span>
                     </div>
                     <div class="exam-info-item">
                       <v-icon small color="primary" class="mr-2">mdi-format-list-checks</v-icon>
-                      <span>Question Types: Multiple choice</span>
+                      <span class="info-text">Question Types: Multiple choice</span>
                     </div>
                     <div class="exam-info-item">
                       <v-icon small color="primary" class="mr-2">mdi-headphones</v-icon>
-                      <span>Audio Sections: Listening comprehension included</span>
+                      <span class="info-text">Audio Sections: Listening comprehension included</span>
                     </div>
                   </v-list-item-content>
                 </v-list-item>
@@ -40,7 +40,7 @@
                 text
                 dense
                 color="primary"
-                class="mb-4"
+                class="mb-4 text-caption text-sm-body-2"
               >
                 Make sure you're in a quiet environment and your audio is working properly.
               </v-alert>
@@ -49,9 +49,9 @@
               @click="startExam"
               color="primary"
               x-large
-              min-width="200"
-              height="50"
-              class="elevation-2"
+              :height="$vuetify.breakpoint.xsOnly ? '44' : '50'"
+              :class="$vuetify.breakpoint.xsOnly ? 'text-body-2' : ''"
+              class="elevation-2 start-button"
             >
               <v-icon left>mdi-play-circle</v-icon>
               Start Exam
@@ -84,7 +84,11 @@
               {{ message }}
             </div>
           </div>
-          <EvaluationComponent v-if="examCompleted" :results="evaluationResults" />
+          <EvaluationComponent 
+            v-if="examCompleted" 
+            :results="evaluationResults" 
+            @retake="handleRetake"
+          />
         </v-card>
       </v-col>
     </v-row>
@@ -214,12 +218,26 @@ export default {
     },
     evaluateExam() {
       axios.post(`${this.baseUrl}/exams/evaluate-exam/${this.examConfig?.exam_attempt_id}${this.urlData}`).then((response) => {
-        this.examCompleted = true
+        this.examCompleted = true;
         this.evaluationResults = response.data.data;
       }).catch((error) => {
-        this.message = error?.response?.data?.message ?? 'Error getting evaluation results'
+        this.message = error?.response?.data?.message ?? 'Error getting evaluation results';
         console.error('Error getting evaluation results:', error);
       });
+    },
+    handleRetake() {
+      // Reset exam state
+      this.examStarted = false;
+      this.examCompleted = false;
+      this.examConfig = null;
+      this.examQuestion = null;
+      this.audioFile = null;
+      this.evaluationResults = null;
+      this.listeningAudioCount = 0;
+      this.message = '';
+      
+      // Start new exam attempt
+      this.startExam();
     }
   }
 
@@ -227,37 +245,72 @@ export default {
 </script>
 
 <style scoped>
-.start-exam-card {
+.exam-card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 8px;
   transition: all 0.3s ease;
-  max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .start-exam-content {
   text-align: center;
+  max-width: 100%;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .exam-description {
+  width: 100%;
   max-width: 500px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .info-card {
   background: rgba(var(--v-primary-base), 0.05);
   border-radius: 8px;
+  width: 100%;
 }
 
 .exam-info-item {
   display: flex;
-  align-items: center;
-  margin-bottom: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
   color: #666;
+  padding: 0 8px;
 }
 
-.exam-info-item:last-child {
-  margin-bottom: 0;
+.info-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .exam-card {
+    height: calc(100vh - 92px);
+    border-radius: 0;
+  }
+
+  .exam-info-item {
+    margin-bottom: 16px;
+  }
+
+  .info-text {
+    font-size: 0.85rem;
+  }
+
+  .start-button {
+    width: 100%;
+    max-width: 280px;
+  }
 }
 
 .exam-content {
@@ -276,16 +329,6 @@ export default {
   padding: 16px;
 }
 
-.v-card {
-  height: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.fill-height {
-  height: 100%;
-}
-
 /* Animation for the start button */
 .v-btn {
   transition: transform 0.3s ease;
@@ -297,5 +340,23 @@ export default {
 
 .v-btn:active {
   transform: translateY(1px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 </style>

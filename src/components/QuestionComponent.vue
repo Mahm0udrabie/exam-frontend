@@ -18,8 +18,8 @@
                   class="header-progress"
                 ></v-progress-linear>
                 
-                <div class="d-flex align-center pa-4">
-                  <div class="text-h5 white--text font-weight-bold">
+                <div class="d-flex align-center pa-2 pa-sm-4">
+                  <div class="text-subtitle-1 text-sm-h5 white--text font-weight-bold">
                     Question {{ question.questionNumber || '' }}
                   </div>
                   <v-spacer></v-spacer>
@@ -27,8 +27,9 @@
                     :color="timeRemaining <= 10 ? 'error' : 'white'"
                     :class="{ 'pulse-animation': timeRemaining <= 10 }"
                     :text-color="timeRemaining <= 10 ? 'white' : 'primary'"
+                    small
                   >
-                    <v-icon left>mdi-clock-outline</v-icon>
+                    <v-icon x-small left>mdi-clock-outline</v-icon>
                     {{ formatTime(timeRemaining) }}
                   </v-chip>
                 </div>
@@ -37,7 +38,7 @@
               <!-- Question Content -->
               <v-card-text class="question-content flex-grow-1 d-flex flex-column">
                 <!-- Question Text -->
-                <div class="text-h6 question-text">{{ question.text }}</div>
+                <div class="text-body-1 text-sm-h6 question-text">{{ question.text }}</div>
 
                 <!-- Question Image -->
                 <div v-if="question.image" class="image-container my-4">
@@ -55,18 +56,18 @@
                     :color="getLevelColor"
                     outlined
                     class="mr-2"
-                    small
+                    x-small
                   >
-                    <v-icon left x-small>mdi-stairs</v-icon>
+                    <v-icon x-small left>mdi-stairs</v-icon>
                     {{ question.level }}
                   </v-chip>
                   
                   <v-chip
                     color="info"
                     outlined
-                    small
+                    x-small
                   >
-                    <v-icon left x-small>mdi-bookmark</v-icon>
+                    <v-icon x-small left>mdi-bookmark</v-icon>
                     {{ question.answer }}
                   </v-chip>
                 </div>
@@ -79,8 +80,8 @@
             <v-card class="fill-height d-flex flex-column" elevation="3">
               <!-- Options Header -->
               <div class="exam-header secondary darken-1">
-                <div class="pa-4">
-                  <div class="text-h5 white--text font-weight-bold d-flex align-center">
+                <div class="pa-2 pa-sm-4">
+                  <div class="text-subtitle-1 text-sm-h5 white--text font-weight-bold d-flex align-center">
                     <v-icon color="white" class="mr-2">mdi-format-list-checks</v-icon>
                     Select Your Answer
                   </div>
@@ -95,10 +96,10 @@
                     v-if="timeRemaining <= 10"
                     dense
                     type="error"
-                    class="mb-4"
+                    class="mb-4 text-caption text-sm-body-2"
                     prominent
                   >
-                    <v-icon left>mdi-alert</v-icon>
+                    <v-icon left small>mdi-alert</v-icon>
                     Time is running out!
                   </v-alert>
                 </v-slide-y-transition>
@@ -122,8 +123,8 @@
                           class="option-radio ma-0"
                         >
                           <template v-slot:label>
-                            <div class="d-flex align-center py-2">
-                              <v-chip small label color="primary" text-color="white" class="mr-3">
+                            <div class="d-flex align-center py-1 py-sm-2">
+                              <v-chip x-small label color="primary" text-color="white" class="mr-2 mr-sm-3">
                                 {{ String.fromCharCode(65 + index) }}
                               </v-chip>
                               <span class="option-text">{{ option }}</span>
@@ -137,15 +138,16 @@
               </v-card-text>
 
               <!-- Submit Button -->
-              <v-card-actions class="pa-4 submit-actions">
+              <v-card-actions class="pa-2 pa-sm-4 submit-actions">
                 <v-spacer></v-spacer>
                 <v-btn
                   @click="submitAnswer"
                   color="primary"
                   :loading="loading"
-                  x-large
-                  min-width="200"
-                  height="50"
+                  :large="!$vuetify.breakpoint.xsOnly"
+                  :block="$vuetify.breakpoint.xsOnly"
+                  min-width="180"
+                  class="submit-button"
                 >
                   <v-icon left>mdi-check</v-icon>
                   Submit Answer
@@ -265,114 +267,112 @@ export default {
 
 .question-content {
   height: calc(100% - 52px);
-  padding: 12px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .question-text {
-  line-height: 1.4;
-  font-size: 1.1rem;
-  margin-bottom: 12px;
+  line-height: 1.6;
+  color: #2c3e50;
 }
 
 .image-container {
   background-color: #f8f8f8;
   border-radius: 8px;
   overflow: hidden;
-  max-height: 160px;
-  margin: 8px 0;
+  max-height: 200px;
+  margin: 12px 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .question-image {
   object-fit: contain;
   background-color: white;
-  max-height: 160px;
+  max-height: 200px;
 }
 
 .options-content {
   height: calc(100% - 52px);
-  padding: 8px 12px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-}
-
-.time-warning {
-  margin: 0 0 8px 0;
-  padding: 4px 12px;
+  overflow-y: auto;
 }
 
 .options-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin: 0;
-  flex: 1;
+  padding: 0;
 }
 
 .option-card {
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
   margin: 0 !important;
+  border-radius: 8px;
 }
 
 .option-card:hover {
-  transform: translateX(2px);
+  transform: translateX(4px);
+  background-color: rgba(var(--v-primary-base), 0.05);
 }
 
 .selected-option {
   border-color: var(--v-primary-base);
-  background-color: var(--v-primary-lighten-5);
+  background-color: rgba(var(--v-primary-base), 0.1);
 }
 
 .option-radio {
   width: 100%;
   margin: 0;
-}
-
-.option-content {
-  padding: 6px 8px;
+  padding: 8px 12px;
 }
 
 .option-text {
-  font-size: 0.95rem;
-  line-height: 1.3;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #2c3e50;
 }
 
 .submit-actions {
   border-top: 1px solid rgba(0, 0, 0, 0.12);
   background-color: #fafafa;
-  padding: 8px 12px !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 959px) {
   .exam-container {
+    height: auto;
     min-height: 100%;
   }
 
   .exam-panel {
-    padding: 2px;
+    height: auto;
+    min-height: 300px;
   }
 
-  .options-list {
-    grid-template-columns: 1fr;
-    gap: 6px;
+  .question-content,
+  .options-content {
+    padding: 12px;
   }
 
-  .question-content, .options-content {
-    padding: 8px;
+  .option-text {
+    font-size: 0.85rem;
   }
-  
-  .submit-actions {
-    padding: 6px 8px !important;
+
+  .submit-button {
+    width: 100%;
+    margin: 0 8px;
   }
 }
 
 /* Minimal scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
-  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -380,11 +380,28 @@ export default {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #bdbdbd;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9e9e9e;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Pulse animation for timer */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 1s infinite;
 }
 </style>
