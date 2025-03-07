@@ -1,8 +1,8 @@
 <template>
-  <v-container v-if="$route.query.exam_type && $route.query.student_id" elevation="0">
+  <v-container v-if="$route.query.exam_type && $route.query.student_id" >
     <v-row align="center" justify="center">
       <v-col cols="auto" >
-        <v-card class="pa-6" elevation="0">
+        <v-card class="pa-6" >
           <!-- Loader -->
           <v-progress-circular
             v-if="loading"
@@ -71,7 +71,7 @@ export default {
   },
   data() {
     return {
-      baseUrl: 'ftcourses.com/api',
+      baseUrl: 'http://ftcourses.test/api',
       loading: false,
       examStarted: false,
       examConfig: null,
