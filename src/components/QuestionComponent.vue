@@ -1,12 +1,11 @@
 <template>
   <div class="exam-container">
     <v-scale-transition>
-      <!-- Main exam layout -->
       <v-container fluid class="pa-0 fill-height">
         <v-row no-gutters class="fill-height">
           <!-- Left Panel - Question -->
-          <v-col cols="12" md="5" class="exam-panel">
-            <v-card class="fill-height d-flex flex-column" elevation="3">
+          <v-col cols="12" lg="4" class="exam-panel">
+            <v-card class="fill-height d-flex flex-column question-card" elevation="3">
               <!-- Progress and Timer Header -->
               <div class="exam-header primary darken-1">
                 <v-progress-linear
@@ -37,47 +36,49 @@
 
               <!-- Question Content -->
               <v-card-text class="question-content flex-grow-1 d-flex flex-column">
-                <!-- Question Text -->
-                <div class="text-body-1 text-sm-h6 question-text">{{ question.text }}</div>
+                <div class="question-wrapper flex-grow-1 d-flex flex-column justify-center">
+                  <!-- Question Text -->
+                  <div class="text-body-1 text-sm-h6 question-text text-center">{{ question.text }}</div>
 
-                <!-- Question Image -->
-                <div v-if="question.image" class="image-container my-4">
-                  <v-img
-                    :src="question.image"
-                    max-height="200"
-                    contain
-                    class="question-image"
-                  ></v-img>
-                </div>
+                  <!-- Question Image -->
+                  <div v-if="question.image" class="image-container my-4">
+                    <v-img
+                      :src="question.image"
+                      max-height="300"
+                      contain
+                      class="question-image"
+                    ></v-img>
+                  </div>
 
-                <!-- Question Metadata -->
-                <div class="mt-auto pt-4">
-                  <v-chip
-                    :color="getLevelColor"
-                    outlined
-                    class="mr-2"
-                    x-small
-                  >
-                    <v-icon x-small left>mdi-stairs</v-icon>
-                    {{ question.level }}
-                  </v-chip>
-                  
-                  <v-chip
-                    color="info"
-                    outlined
-                    x-small
-                  >
-                    <v-icon x-small left>mdi-bookmark</v-icon>
-                    {{ question.answer }}
-                  </v-chip>
+                  <!-- Question Metadata -->
+                  <div class="question-metadata mt-4">
+                    <v-chip
+                      :color="getLevelColor"
+                      outlined
+                      class="mr-2"
+                      x-small
+                    >
+                      <v-icon x-small left>mdi-stairs</v-icon>
+                      {{ question.level }}
+                    </v-chip>
+                    
+                    <v-chip
+                      color="info"
+                      outlined
+                      x-small
+                    >
+                      <v-icon x-small left>mdi-bookmark</v-icon>
+                      {{ question.answer }}
+                    </v-chip>
+                  </div>
                 </div>
               </v-card-text>
             </v-card>
           </v-col>
 
           <!-- Right Panel - Options -->
-          <v-col cols="12" md="7" class="exam-panel">
-            <v-card class="fill-height d-flex flex-column" elevation="3">
+          <v-col cols="12" lg="8" class="exam-panel">
+            <v-card class="fill-height d-flex flex-column answer-card" elevation="3">
               <!-- Options Header -->
               <div class="exam-header secondary darken-1">
                 <div class="pa-2 pa-sm-4">
@@ -123,8 +124,8 @@
                           class="option-radio ma-0"
                         >
                           <template v-slot:label>
-                            <div class="d-flex align-center py-1 py-sm-2">
-                              <v-chip x-small label color="primary" text-color="white" class="mr-2 mr-sm-3">
+                            <div class="d-flex align-center py-2 py-sm-3">
+                              <v-chip label color="primary" text-color="white" class="mr-3 option-chip">
                                 {{ String.fromCharCode(65 + index) }}
                               </v-chip>
                               <span class="option-text">{{ option }}</span>
@@ -135,22 +136,22 @@
                     </template>
                   </v-hover>
                 </v-radio-group>
-              </v-card-text>
 
-              <!-- Submit Button -->
-              <v-card-actions class="pa-2 pa-sm-4 submit-actions">
-                <v-spacer></v-spacer>
-                <v-btn
-                  @click="submitAnswer"
-                  color="primary"
-                  :loading="loading"
-                  large
-                  class="submit-button"
-                >
-                  <v-icon left>mdi-check</v-icon>
-                  Submit Answer
-                </v-btn>
-              </v-card-actions>
+                <!-- Submit Button -->
+                <div class="submit-container mt-6">
+                  <v-btn
+                    @click="submitAnswer"
+                    color="primary"
+                    :loading="loading"
+                    large
+                    block
+                    class="submit-button"
+                  >
+                    <v-icon left>mdi-check</v-icon>
+                    Submit Answer
+                  </v-btn>
+                </div>
+              </v-card-text>
             </v-card>
           </v-col>
         </v-row>
@@ -237,6 +238,7 @@ export default {
 <style scoped>
 .exam-container {
   height: 100%;
+  min-height: calc(100vh - 92px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -248,12 +250,18 @@ export default {
 
 .exam-panel {
   height: 100%;
-  padding: 4px;
+  padding: 8px;
+}
+
+.question-card,
+.answer-card {
+  overflow: hidden;
 }
 
 .exam-header {
   position: relative;
-  height: 52px;
+  height: 56px;
+  z-index: 1;
 }
 
 .header-progress {
@@ -264,45 +272,67 @@ export default {
 }
 
 .question-content {
-  height: calc(100% - 52px);
-  padding: 12px 16px;
+  height: calc(100% - 56px);
+  padding: 20px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+}
+
+.question-wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .question-text {
+  font-size: 1.1rem;
   line-height: 1.6;
   color: #2c3e50;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .image-container {
   background-color: #f8f8f8;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  max-height: 200px;
-  margin: 12px 0;
+  max-height: 300px;
+  margin: 20px auto;
   border: 1px solid rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
 }
 
 .question-image {
   object-fit: contain;
   background-color: white;
-  max-height: 200px;
+  max-height: 300px;
+}
+
+.question-metadata {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
 }
 
 .options-content {
-  height: calc(100% - 52px);
-  padding: 12px 16px;
+  height: calc(100% - 56px);
+  padding: 20px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .options-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin: 0;
   padding: 0;
 }
@@ -311,7 +341,7 @@ export default {
   transition: all 0.3s ease;
   border: 2px solid transparent;
   margin: 0 !important;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .option-card:hover {
@@ -327,65 +357,117 @@ export default {
 .option-radio {
   width: 100%;
   margin: 0;
-  padding: 8px 12px;
+  padding: 12px 16px;
+}
+
+.option-chip {
+  min-width: 32px;
+  font-weight: 600;
 }
 
 .option-text {
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 1rem;
+  line-height: 1.5;
   color: #2c3e50;
 }
 
-.submit-actions {
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
-  background-color: #fafafa;
+.submit-container {
+  margin-top: 24px;
+  padding: 0 16px;
 }
 
 .submit-button {
-  min-width: 180px;
+  min-width: 200px;
+  transition: all 0.3s ease;
 }
 
-@media (max-width: 959px) {
+.submit-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1264px) {
   .exam-container {
     height: auto;
-    min-height: 100%;
   }
 
   .exam-panel {
     height: auto;
+    min-height: 400px;
+  }
+
+  .question-content,
+  .options-content {
+    height: auto;
+    min-height: 350px;
+  }
+
+  .question-text {
+    font-size: 1rem;
+  }
+
+  .option-text {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .exam-panel {
+    padding: 4px;
     min-height: 300px;
   }
 
   .question-content,
   .options-content {
-    padding: 12px;
+    padding: 16px;
+    min-height: 250px;
+  }
+
+  .image-container {
+    margin: 16px auto;
+    max-height: 200px;
+  }
+
+  .question-image {
+    max-height: 200px;
+  }
+
+  .option-radio {
+    padding: 8px 12px;
   }
 
   .option-text {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  .submit-container {
+    padding: 0;
   }
 
   .submit-button {
     width: 100%;
-    margin: 0 8px;
   }
 }
 
-/* Minimal scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
+/* Scrollbar styling */
+.question-content::-webkit-scrollbar,
+.options-content::-webkit-scrollbar {
+  width: 6px;
 }
 
-::-webkit-scrollbar-track {
+.question-content::-webkit-scrollbar-track,
+.options-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+.question-content::-webkit-scrollbar-thumb,
+.options-content::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.question-content::-webkit-scrollbar-thumb:hover,
+.options-content::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
 

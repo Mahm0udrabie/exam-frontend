@@ -1,7 +1,7 @@
 <template>
-  <v-container v-if="$route.query.exam_type && $route.query.student_id" class="pa-0 pa-sm-3">
+  <v-container v-if="$route.query.exam_type && $route.query.student_id" class="pa-0">
     <v-row align="center" justify="center" class="ma-0">
-      <v-col cols="12" sm="11" md="10" lg="8" xl="6" class="pa-0 pa-sm-2">
+      <v-col cols="12" class="pa-0">
         <v-card class="exam-card">
           <!-- Loader -->
           <v-progress-circular
@@ -133,7 +133,7 @@ export default {
   },
   data() {
     return {
-      baseUrl: 'http://ftcourses.test/api',
+      baseUrl: 'https://ftcourses.com/api',
       loading: false,
       examStarted: false,
       examConfig: null,
@@ -284,8 +284,8 @@ export default {
   border-radius: 8px;
   transition: all 0.3s ease;
   width: 100%;
-  height: calc(100vh - 120px);
-  overflow-y: auto;
+  min-height: calc(100vh - 92px);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -334,8 +334,9 @@ export default {
 
 @media (max-width: 600px) {
   .exam-card {
-    height: calc(100vh - 92px);
+    min-height: calc(100vh - 92px);
     border-radius: 0;
+    overflow-y: auto;
   }
 
   .exam-info-item {
