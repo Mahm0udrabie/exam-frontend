@@ -144,9 +144,7 @@
                   @click="submitAnswer"
                   color="primary"
                   :loading="loading"
-                  :large="!$vuetify.breakpoint.xsOnly"
-                  :block="$vuetify.breakpoint.xsOnly"
-                  min-width="180"
+                  large
                   class="submit-button"
                 >
                   <v-icon left>mdi-check</v-icon>
@@ -343,7 +341,10 @@ export default {
   background-color: #fafafa;
 }
 
-/* Responsive adjustments */
+.submit-button {
+  min-width: 180px;
+}
+
 @media (max-width: 959px) {
   .exam-container {
     height: auto;

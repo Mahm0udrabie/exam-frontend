@@ -1,11 +1,10 @@
 <template>
   <div class="evaluation-container">
-    <v-card class="evaluation-card" elevation="2">
+    <v-card class="evaluation-card" elevation="0">
       <div class="text-center pa-4 pa-sm-6">
         <v-icon 
-          :size="$vuetify.breakpoint.xsOnly ? 48 : 64"
+          class="result-icon mb-4"
           :color="results.passed ? 'success' : 'error'"
-          class="mb-4"
         >
           {{ results.passed ? 'mdi-check-circle' : 'mdi-alert-circle' }}
         </v-icon>
@@ -38,7 +37,7 @@
         <v-list-item v-if="results.exam">
           <v-list-item-content>
             <v-list-item-title class="font-weight-bold text-body-2 text-sm-body-1">Required Score</v-list-item-title>
-            <v-list-item-subtitle class="text-body-2">{{ results.exam.passing_score }}%</v-list-item-subtitle>
+            <v-list-item-subtitle class="text-body-2">{{ results.exam.passing_criteria }}%</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
 
@@ -58,12 +57,11 @@
         <div v-if="!results.passed && canRetake" class="mb-4">
           <v-btn
             color="primary"
-            :large="!$vuetify.breakpoint.xsOnly"
-            :block="$vuetify.breakpoint.xsOnly"
+            large
             @click="retakeExam"
             :loading="loading"
             min-width="200"
-            class="mb-2"
+            class="retake-button mb-2"
           >
             <v-icon left>mdi-refresh</v-icon>
             Retake Exam
@@ -88,8 +86,7 @@
           text
           color="grey"
           @click="goHome"
-          :block="$vuetify.breakpoint.xsOnly"
-          class="mt-2"
+          class="home-button mt-2"
         >
           <v-icon left>mdi-home</v-icon>
           Return to Home
@@ -156,6 +153,16 @@ export default {
   overflow: hidden;
 }
 
+.result-icon {
+  font-size: 64px;
+  height: 64px;
+  width: 64px;
+}
+
+.retake-button {
+  min-width: 200px;
+}
+
 .v-list-item {
   min-height: 48px;
   padding: 8px 16px;
@@ -169,6 +176,17 @@ export default {
   .v-list-item {
     min-height: 40px;
     padding: 4px 16px;
+  }
+
+  .result-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+  }
+
+  .retake-button,
+  .home-button {
+    width: 100%;
   }
 }
 

@@ -49,8 +49,6 @@
               @click="startExam"
               color="primary"
               x-large
-              :height="$vuetify.breakpoint.xsOnly ? '44' : '50'"
-              :class="$vuetify.breakpoint.xsOnly ? 'text-body-2' : ''"
               class="elevation-2 start-button"
             >
               <v-icon left>mdi-play-circle</v-icon>
@@ -77,11 +75,35 @@
               @update-audio-completed="updateAudioCompleted"
             />
             <CounterComponent 
-             v-if="examQuestion && (!examConfig?.is_audio_level || listeningAudioCount >= examConfig?.audio_listening_count) && !examCompleted"
-            :current="examConfig?.question_number" :total="examConfig?.questions_count" 
+              v-if="examQuestion && (!examConfig?.is_audio_level || listeningAudioCount >= examConfig?.audio_listening_count) && !examCompleted"
+              :current="examConfig?.question_number" 
+              :total="examConfig?.questions_count" 
             />
-            <div v-else>
-              {{ message }}
+            <div v-if="message && examStarted && !examCompleted" class="error-container pa-4">
+              <v-alert
+                border="left"
+                colored-border
+                type="error"
+                elevation="2"
+                class="error-alert mb-4"
+              >
+                <div class="d-flex align-center">
+                  <v-icon size="24" class="mr-3">mdi-alert-circle</v-icon>
+                  <div>
+                    <div class="text-subtitle-1 font-weight-medium mb-1">An error occurred</div>
+                    <div class="text-body-2">{{ message }}</div>
+                  </div>
+                </div>
+              </v-alert>
+              <v-btn
+                color="primary"
+                outlined
+                @click="handleRetry"
+                class="retry-button"
+              >
+                <v-icon left>mdi-refresh</v-icon>
+                Try Again
+              </v-btn>
             </div>
           </div>
           <EvaluationComponent 
@@ -238,6 +260,18 @@ export default {
       
       // Start new exam attempt
       this.startExam();
+    },
+    handleRetry() {
+      if (this.examStarted) {
+        if (this.examConfig?.is_audio_level) {
+          this.getAudioFile();
+        } else {
+          this.getNextQuestion();
+        }
+      } else {
+        this.startExam();
+      }
+      this.message = '';
     }
   }
 
@@ -293,6 +327,11 @@ export default {
   line-height: 1.4;
 }
 
+.start-button {
+  min-width: 200px;
+  height: 50px;
+}
+
 @media (max-width: 600px) {
   .exam-card {
     height: calc(100vh - 92px);
@@ -310,6 +349,8 @@ export default {
   .start-button {
     width: 100%;
     max-width: 280px;
+    height: 44px;
+    font-size: 0.875rem;
   }
 }
 
@@ -358,5 +399,45 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+}
+
+.error-alert {
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.retry-button {
+  min-width: 150px;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .error-container {
+    min-height: 180px;
+    padding: 16px;
+  }
+
+  .error-alert {
+    text-align: left;
+  }
+
+  .retry-button {
+    width: 100%;
+    max-width: 280px;
+  }
 }
 </style>
