@@ -12,19 +12,55 @@
             class="mx-auto"
           ></v-progress-circular>
 
-          <v-btn
-            v-if="!examStarted && !loading"
-            align="center" justify="center"
-            @click="startExam"
-            color="primary"
-            large
-          >
-            Start Exam
-          </v-btn>
+          <div v-if="!examStarted && !loading" class="start-exam-content pa-8">
+            <v-icon size="64" color="primary" class="mb-4">mdi-book-open-variant</v-icon>
+            <h1 class="text-h4 mb-4">Online English Exam</h1>
+            <div class="exam-description mb-6">
+              <p class="text-body-1 mb-3">Welcome to the English Proficiency Test</p>
+              <v-card class="info-card mb-4" flat>
+                <v-list-item three-line>
+                  <v-list-item-content>
+                    <div class="exam-info-item">
+                      <v-icon small color="primary" class="mr-2">mdi-clock-outline</v-icon>
+                      <span>Duration: Multiple timed questions</span>
+                    </div>
+                    <div class="exam-info-item">
+                      <v-icon small color="primary" class="mr-2">mdi-format-list-checks</v-icon>
+                      <span>Question Types: Multiple choice</span>
+                    </div>
+                    <div class="exam-info-item">
+                      <v-icon small color="primary" class="mr-2">mdi-headphones</v-icon>
+                      <span>Audio Sections: Listening comprehension included</span>
+                    </div>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-card>
+              <v-alert
+                type="info"
+                text
+                dense
+                color="primary"
+                class="mb-4"
+              >
+                Make sure you're in a quiet environment and your audio is working properly.
+              </v-alert>
+            </div>
+            <v-btn
+              @click="startExam"
+              color="primary"
+              x-large
+              min-width="200"
+              height="50"
+              class="elevation-2"
+            >
+              <v-icon left>mdi-play-circle</v-icon>
+              Start Exam
+            </v-btn>
+          </div>
           <div v-if="examStarted && !loading">
             <AudioComponent
              @update-count="handleCount"
-              v-if="examConfig?.is_audio_level && listeningAudioCount < examConfig?.audio_listening_count"
+              v-if="examConfig?.is_audio_level && listeningAudioCount < examConfig?.audio_listening_count && !examCompleted"
               :audioFile="audioFile"
               :listeningToAudio="listeningToAudio"
               :audioListeningCount="examConfig?.audio_listening_count"
@@ -189,3 +225,77 @@ export default {
 
 };
 </script>
+
+<style scoped>
+.start-exam-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.start-exam-content {
+  text-align: center;
+}
+
+.exam-description {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.info-card {
+  background: rgba(var(--v-primary-base), 0.05);
+  border-radius: 8px;
+}
+
+.exam-info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.exam-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.exam-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.question-component {
+  flex: 1;
+  min-height: 0;
+}
+
+.counter-component {
+  margin-top: auto;
+  padding: 16px;
+}
+
+.v-card {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.fill-height {
+  height: 100%;
+}
+
+/* Animation for the start button */
+.v-btn {
+  transition: transform 0.3s ease;
+}
+
+.v-btn:hover {
+  transform: translateY(-2px);
+}
+
+.v-btn:active {
+  transform: translateY(1px);
+}
+</style>
