@@ -9,9 +9,8 @@
           class="mr-3"
         ></v-img>
         <v-spacer></v-spacer>
-        <v-chip color="primary" class="font-weight-bold">
-          <v-icon left>mdi-school</v-icon>
-          Online Examination System
+        <v-chip color="primary ml-1" class="font-weight-bold">
+          <v-icon  left >mdi-school</v-icon>&ensp;Online Examination System 
         </v-chip>
       </v-container>
     </v-app-bar>

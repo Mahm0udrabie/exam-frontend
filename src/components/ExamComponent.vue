@@ -83,8 +83,8 @@
             <div v-else>
               {{ message }}
             </div>
-            <EvaluationComponent v-if="examCompleted" :results="evaluationResults" />
           </div>
+          <EvaluationComponent v-if="examCompleted" :results="evaluationResults" />
         </v-card>
       </v-col>
     </v-row>
