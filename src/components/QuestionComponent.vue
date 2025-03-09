@@ -38,7 +38,7 @@
               <v-card-text class="question-content flex-grow-1 d-flex flex-column">
                 <div class="question-wrapper flex-grow-1 d-flex flex-column justify-center">
                   <!-- Question Text -->
-                  <div class="text-body-1 text-sm-h6 question-text text-center">{{ question.text }}</div>
+                  <div class="text-body-1 text-sm-h6 question-text text-left px-3">{{ question.text }}</div>
 
                   <!-- Question Metadata this part for testing will be removed later -->
                   <div class="question-metadata mt-4">
@@ -80,7 +80,7 @@
                   <v-hover v-for="(option, index) in question.options" :key="index">
                     <template v-slot:default="{ hover }">
                       <v-card
-                        class="option-card mb-3"
+                        class="option-card"
                         :elevation="hover || selectedAnswer === option ? 3 : 1"
                         :class="{ 
                           'selected-option': selectedAnswer === option,
@@ -90,14 +90,16 @@
                         <v-radio
                           :value="option"
                           color="primary"
-                          class="option-radio ma-0"
+                          class="option-radio"
                           :disabled="loading"
                         >
                           <template v-slot:label>
-                            <div class="d-flex align-center option-content py-2 py-sm-3">
-                              <v-chip label color="primary" text-color="white" class="option-chip flex-shrink-0">
-                                {{ String.fromCharCode(65 + index) }}
-                              </v-chip>
+                            <div class="option-content">
+                              <div class="option-label">
+                                <v-chip label color="primary" text-color="white" class="option-chip">
+                                  {{ String.fromCharCode(65 + index) }}
+                                </v-chip>
+                              </div>
                               <div class="option-text-wrapper">
                                 <span class="option-text">{{ option }}</span>
                               </div>
@@ -263,10 +265,11 @@ export default {
   font-size: 1.1rem;
   line-height: 1.6;
   color: #2c3e50;
-  margin-bottom: 20px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 16px 0;
+  width: 100%;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .image-container {
@@ -296,7 +299,7 @@ export default {
 
 .options-content {
   height: calc(100% - 56px);
-  padding: 20px;
+  padding: 12px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -305,62 +308,65 @@ export default {
 .options-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
 
 .option-card {
   transition: all 0.3s ease;
   border: 2px solid transparent;
-  margin: 0 !important;
+  margin-bottom: 8px !important;
   border-radius: 12px;
+  width: 100%;
   overflow: hidden;
+  background: #fff;
 }
 
-.option-card:hover {
-  transform: translateX(4px);
-  background-color: rgba(var(--v-primary-base), 0.05);
+.option-content {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
 }
 
-.selected-option {
-  border-color: var(--v-primary-base);
-  background-color: rgba(var(--v-primary-base), 0.1);
+.option-label {
+  flex-shrink: 0;
+  margin-right: 12px;
+  display: flex;
+  align-items: flex-start;
 }
 
-.option-card.disabled-option {
-  opacity: 0.7;
-  cursor: not-allowed;
-  pointer-events: none;
+.option-chip {
+  min-width: 28px;
+  width: 28px;
+  height: 28px !important;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.option-text-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.option-text {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #2c3e50;
+  width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .option-radio {
   width: 100%;
   margin: 0;
-  padding: 12px 16px;
-}
-
-.option-chip {
-  min-width: 32px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.option-text-wrapper {
-  flex-grow: 1;
-  margin-left: 12px;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
-}
-
-.option-text {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #2c3e50;
-  display: inline-block;
-  width: 100%;
 }
 
 .submit-container {
@@ -411,7 +417,7 @@ export default {
 
   .question-content,
   .options-content {
-    padding: 16px;
+    padding: 8px;
     min-height: 250px;
   }
 
@@ -424,31 +430,146 @@ export default {
     max-height: 200px;
   }
 
+  .question-text {
+    font-size: 1rem;
+    line-height: 1.4;
+    padding: 0 4px;
+    margin: 12px 0;
+  }
+
   .option-content {
+    padding: 8px;
     min-height: 40px;
-    padding: 8px 0;
+  }
+
+  .option-label {
+    margin-right: 8px;
+  }
+
+  .option-chip {
+    min-width: 24px;
+    width: 24px;
+    height: 24px !important;
   }
 
   .option-text {
     font-size: 0.9rem;
-    line-height: 1.4;
+    line-height: 1.35;
   }
 
-  .option-chip {
-    min-width: 28px;
-    height: 28px !important;
-  }
-
-  .option-radio {
-    padding: 8px 12px;
+  .options-list {
+    gap: 8px;
   }
 
   .submit-container {
-    padding: 0;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .question-content,
+  .options-content {
+    padding: 6px;
   }
 
-  .submit-button {
-    width: 100%;
+  .option-content {
+    padding: 6px;
+  }
+
+  .option-label {
+    margin-right: 6px;
+  }
+
+  .option-text {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+
+  .option-chip {
+    min-width: 22px;
+    width: 22px;
+    height: 22px !important;
+  }
+
+  .options-content {
+    padding: 4px;
+  }
+
+  .options-list {
+    gap: 6px;
+  }
+
+  .option-card {
+    margin-bottom: 6px !important;
+  }
+
+  /* Force text wrapping on very narrow screens */
+  .option-text-wrapper {
+    padding-right: 4px;
+  }
+
+  .option-text {
+    display: inline-block;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .submit-container {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 412px) {
+  .question-content,
+  .options-content {
+    padding: 0px;
+  }
+
+  .option-content {
+    padding: 0px;
+  }
+
+  .option-label {
+    margin-right: 4px;
+  }
+
+  .option-chip {
+    display: none;
+    min-width: 22px;
+    width: 22px;
+    height: 22px !important;
+  }
+
+  .options-content {
+    padding: 2px;
+  }
+
+  .options-list {
+    gap: 6px;
+  }
+
+  .option-card {
+    margin-bottom: 6px !important;
+  }
+
+  /* Force text wrapping on very narrow screens */
+  .option-text-wrapper {
+    padding-right: 4px;
+  }
+
+  .option-text {
+    font-size: 0.95rem;
+    line-height: .9;
+    display: inline-block;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    width: 250px;
+  }
+
+  .submit-container {
+    margin-top: 16px;
   }
 }
 
@@ -489,5 +610,20 @@ export default {
 
 .pulse-animation {
   animation: pulse 1s infinite;
+}
+
+/* Add styles for selected and hover states */
+.option-card.selected-option {
+  border-color: var(--v-primary-base);
+  background-color: rgba(var(--v-primary-base), 0.05);
+}
+
+.option-card:hover:not(.disabled-option) {
+  background-color: rgba(var(--v-primary-base), 0.02);
+}
+
+.option-card.disabled-option {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 </style>
