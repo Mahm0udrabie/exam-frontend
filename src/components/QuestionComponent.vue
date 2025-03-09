@@ -69,16 +69,6 @@
           <!-- Right Panel - Options -->
           <v-col cols="12" lg="8" class="exam-panel">
             <v-card class="fill-height d-flex flex-column answer-card" elevation="3">
-              <!-- Options Header -->
-              <div class="exam-header secondary darken-1">
-                <div class="pa-2 pa-sm-4">
-                  <div class="text-subtitle-1 text-sm-h5 white--text font-weight-bold d-flex align-center">
-                    <v-icon color="white" class="mr-2">mdi-format-list-checks</v-icon>
-                    Select Your Answer
-                  </div>
-                </div>
-              </div>
-
               <!-- Options Content -->
               <v-card-text class="options-content flex-grow-1">
                 <!-- Options List -->
