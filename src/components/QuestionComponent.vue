@@ -40,17 +40,7 @@
                   <!-- Question Text -->
                   <div class="text-body-1 text-sm-h6 question-text text-center">{{ question.text }}</div>
 
-                  <!-- Question Image -->
-                  <div v-if="question.image" class="image-container my-4">
-                    <v-img
-                      :src="question.image"
-                      max-height="300"
-                      contain
-                      class="question-image"
-                    ></v-img>
-                  </div>
-
-                  <!-- Question Metadata -->
+                  <!-- Question Metadata this part for testing will be removed later -->
                   <div class="question-metadata mt-4">
                     <v-chip
                       :color="getLevelColor"
@@ -61,7 +51,7 @@
                       <v-icon x-small left>mdi-stairs</v-icon>
                       {{ question.level }}
                     </v-chip>
-                    
+
                     <v-chip
                       color="info"
                       outlined
@@ -91,20 +81,6 @@
 
               <!-- Options Content -->
               <v-card-text class="options-content flex-grow-1">
-                <!-- Time Warning -->
-                <v-slide-y-transition>
-                  <v-alert
-                    v-if="timeRemaining <= 10"
-                    dense
-                    type="error"
-                    class="mb-4 text-caption text-sm-body-2"
-                    prominent
-                  >
-                    <v-icon left small>mdi-alert</v-icon>
-                    Time is running out!
-                  </v-alert>
-                </v-slide-y-transition>
-
                 <!-- Options List -->
                 <v-radio-group 
                   v-model="selectedAnswer"
@@ -116,19 +92,25 @@
                       <v-card
                         class="option-card mb-3"
                         :elevation="hover || selectedAnswer === option ? 3 : 1"
-                        :class="{ 'selected-option': selectedAnswer === option }"
+                        :class="{ 
+                          'selected-option': selectedAnswer === option,
+                          'disabled-option': loading 
+                        }"
                       >
                         <v-radio
                           :value="option"
                           color="primary"
                           class="option-radio ma-0"
+                          :disabled="loading"
                         >
                           <template v-slot:label>
-                            <div class="d-flex align-center py-2 py-sm-3">
-                              <v-chip label color="primary" text-color="white" class="mr-3 option-chip">
+                            <div class="d-flex align-center option-content py-2 py-sm-3">
+                              <v-chip label color="primary" text-color="white" class="option-chip flex-shrink-0">
                                 {{ String.fromCharCode(65 + index) }}
                               </v-chip>
-                              <span class="option-text">{{ option }}</span>
+                              <div class="option-text-wrapper">
+                                <span class="option-text">{{ option }}</span>
+                              </div>
                             </div>
                           </template>
                         </v-radio>
@@ -143,6 +125,7 @@
                     @click="submitAnswer"
                     color="primary"
                     :loading="loading"
+                    :disabled="!selectedAnswer || loading"
                     large
                     block
                     class="submit-button"
@@ -342,6 +325,7 @@ export default {
   border: 2px solid transparent;
   margin: 0 !important;
   border-radius: 12px;
+  overflow: hidden;
 }
 
 .option-card:hover {
@@ -354,6 +338,12 @@ export default {
   background-color: rgba(var(--v-primary-base), 0.1);
 }
 
+.option-card.disabled-option {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .option-radio {
   width: 100%;
   margin: 0;
@@ -363,12 +353,24 @@ export default {
 .option-chip {
   min-width: 32px;
   font-weight: 600;
+  flex-shrink: 0;
+}
+
+.option-text-wrapper {
+  flex-grow: 1;
+  margin-left: 12px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .option-text {
   font-size: 1rem;
   line-height: 1.5;
   color: #2c3e50;
+  display: inline-block;
+  width: 100%;
 }
 
 .submit-container {
@@ -432,12 +434,23 @@ export default {
     max-height: 200px;
   }
 
-  .option-radio {
-    padding: 8px 12px;
+  .option-content {
+    min-height: 40px;
+    padding: 8px 0;
   }
 
   .option-text {
     font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .option-chip {
+    min-width: 28px;
+    height: 28px !important;
+  }
+
+  .option-radio {
+    padding: 8px 12px;
   }
 
   .submit-container {

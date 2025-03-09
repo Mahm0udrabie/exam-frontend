@@ -66,6 +66,11 @@
               @replay-audio="handleReplayAudio"
               @proceed-to-question="handleProceedToQuestion"
             />
+            <CounterComponent 
+              v-if="examQuestion && (!examConfig?.is_audio_level || listeningAudioCount >= examConfig?.audio_listening_count) && !examCompleted"
+              :current="examConfig?.question_number" 
+              :total="examConfig?.questions_count" 
+            />
             <QuestionComponent
               v-if="examQuestion && (!examConfig?.is_audio_level || listeningAudioCount >= examConfig?.audio_listening_count) && !examCompleted"
               :question="examQuestion"
@@ -74,11 +79,7 @@
               @time-up="handleTimeUp"
               @update-audio-completed="updateAudioCompleted"
             />
-            <CounterComponent 
-              v-if="examQuestion && (!examConfig?.is_audio_level || listeningAudioCount >= examConfig?.audio_listening_count) && !examCompleted"
-              :current="examConfig?.question_number" 
-              :total="examConfig?.questions_count" 
-            />
+
             <div v-if="message && examStarted && !examCompleted" class="error-container pa-4">
               <v-alert
                 border="left"
@@ -95,21 +96,11 @@
                   </div>
                 </div>
               </v-alert>
-              <v-btn
-                color="primary"
-                outlined
-                @click="handleRetry"
-                class="retry-button"
-              >
-                <v-icon left>mdi-refresh</v-icon>
-                Try Again
-              </v-btn>
             </div>
           </div>
           <EvaluationComponent 
             v-if="examCompleted" 
             :results="evaluationResults" 
-            @retake="handleRetake"
           />
         </v-card>
       </v-col>
@@ -147,7 +138,7 @@ export default {
     };
   },
   created() {
-    this.urlData = `?exam_type=${this.$route.query.exam_type}&expires=${this.$route.query.expires}&student_id=${this.$route.query.student_id}&signature=${this.$route.query.signature}&exam_attempt_id=${this.examConfig?.exam_attempt_id}`;
+    this.urlData = `?exam_type=${this.$route.query.exam_type}&expires=${this.$route.query.expires}&student_id=${this.$route.query.student_id}&signature=${this.$route.query.signature}`;
   },
   watch: {
     examConfig: {
@@ -155,7 +146,12 @@ export default {
       deep: true,
       handler() {
         if(this.examConfig?.is_audio_level && this.listeningAudioCount < this.examConfig.audio_listening_count) { 
-          this.getAudioFile()
+          if(this.examConfig?.audio_used && this.examConfig.exam_type == 'progression') {
+            this.listeningAudioCount  = this.examConfig.audio_listening_count;
+            this.handleAudioEnded()
+          } else {
+            this.getAudioFile()
+          }
         }
       }
     }
@@ -231,6 +227,7 @@ export default {
           if(!this.examConfig.is_audio_level) {
             this.listeningAudioCount = 0
           }
+         this.message= ''
         }).catch((error) => {
           this.message = error?.response?.data?.message ?? 'Error getting next question'
           console.error('Error getting next question:', error);
@@ -247,32 +244,6 @@ export default {
         console.error('Error getting evaluation results:', error);
       });
     },
-    handleRetake() {
-      // Reset exam state
-      this.examStarted = false;
-      this.examCompleted = false;
-      this.examConfig = null;
-      this.examQuestion = null;
-      this.audioFile = null;
-      this.evaluationResults = null;
-      this.listeningAudioCount = 0;
-      this.message = '';
-      
-      // Start new exam attempt
-      this.startExam();
-    },
-    handleRetry() {
-      if (this.examStarted) {
-        if (this.examConfig?.is_audio_level) {
-          this.getAudioFile();
-        } else {
-          this.getNextQuestion();
-        }
-      } else {
-        this.startExam();
-      }
-      this.message = '';
-    }
   }
 
 };
