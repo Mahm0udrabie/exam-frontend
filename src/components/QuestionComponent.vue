@@ -41,7 +41,7 @@
                   <div class="text-body-1 text-sm-h6 question-text text-left px-3">{{ question.text }}</div>
 
                   <!-- Question Metadata this part for testing will be removed later -->
-                  <div class="question-metadata mt-4">
+                  <!-- <div class="question-metadata mt-4">
                     <v-chip
                       :color="getLevelColor"
                       outlined
@@ -60,7 +60,7 @@
                       <v-icon x-small left>mdi-bookmark</v-icon>
                       {{ question.answer }}
                     </v-chip>
-                  </div>
+                  </div> -->
                 </div>
               </v-card-text>
             </v-card>
@@ -565,11 +565,21 @@ export default {
     word-break: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
-    width: 250px;
+    width: 280px;
   }
 
   .submit-container {
     margin-top: 16px;
+  }
+
+  .question-text {
+    font-size: 0.95rem;
+    line-height: .9;
+    display: inline-block;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    width: 370px;
   }
 }
 
