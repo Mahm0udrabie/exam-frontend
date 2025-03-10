@@ -200,6 +200,7 @@ export default {
       clearInterval(this.timer);
       await this.$emit('answer', this.selectedAnswer);
       this.loading = false;
+      this.selectedAnswer = '';
     },
     formatTime(seconds) {
       const minutes = Math.floor(seconds / 60);
@@ -402,6 +403,8 @@ export default {
 
   .question-text {
     font-size: 1rem;
+    height: auto;
+
   }
 
   .option-text {
@@ -435,6 +438,7 @@ export default {
     line-height: 1.4;
     padding: 0 4px;
     margin: 12px 0;
+    height: auto;
   }
 
   .option-content {
@@ -573,6 +577,7 @@ export default {
   }
 
   .question-text {
+    height: auto;
     font-size: 0.95rem;
     line-height: .9;
     display: inline-block;
