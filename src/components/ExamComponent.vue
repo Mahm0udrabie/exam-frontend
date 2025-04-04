@@ -195,6 +195,7 @@ export default {
       });
     },
     handleAnswer(answer) {
+      this.loading = true
       axios.post(`${this.baseUrl}/exams/submit-answer${this.urlData}`,
         {
           answer: answer,
@@ -213,6 +214,7 @@ export default {
         this.message = error?.response?.data?.message ?? 'Error submitting answer'
         console.error('Error submitting answer:', error);
       });
+      this.loading = false;
     },
     handleTimeUp() {
       this.handleAnswer('')

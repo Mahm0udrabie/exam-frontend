@@ -16,8 +16,8 @@
                   class="header-progress"
                 ></v-progress-linear>
                 
-                <div class="d-flex align-center pa-2 pa-sm-4">
-                  <div class="text-subtitle-1 text-sm-h5 white--text font-weight-bold">
+                <div class="d-flex align-center pa-2">
+                  <div class="text-subtitle-1 white--text font-weight-bold">
                     Question {{ question.questionNumber || '' }}
                   </div>
                   <v-spacer></v-spacer>
@@ -26,9 +26,9 @@
                     :color="timeRemaining <= 10 ? 'error' : 'white'"
                     :class="{ 'pulse-animation': timeRemaining <= 10 }"
                     :text-color="timeRemaining <= 10 ? 'white' : 'primary'"
-                    small
+                    class="timer-chip"
                   >
-                    <v-icon x-small left>mdi-clock-outline</v-icon>
+                    <v-icon left small>mdi-clock-outline</v-icon>
                     {{ formatTime(timeRemaining) }}
                   </v-chip>
                 </div>
@@ -38,30 +38,8 @@
               <v-card-text class="exam-content">
                 <!-- Question Section -->
                 <div class="question-section">
-                  <div class="text-h6 text-sm-h5 question-text">
+                  <div class="question-text">
                     {{ question.text }}
-
-                     <!-- Question Metadata this part for testing will be removed later -->
-                  <!-- <div class="question-metadata mt-4">
-                    <v-chip
-                      :color="getLevelColor"
-                      outlined
-                      class="mr-2"
-                      x-small
-                    >
-                      <v-icon x-small left>mdi-stairs</v-icon>
-                      {{ question.level }}
-                    </v-chip>
-
-                    <v-chip
-                      color="info"
-                      outlined
-                      x-small
-                    >
-                      <v-icon x-small left>mdi-bookmark</v-icon>
-                      {{ question.answer }}
-                    </v-chip>
-                  </div> -->
                   </div>
                 </div>
 
@@ -76,7 +54,7 @@
                       <template v-slot:default="{ hover }">
                         <v-card
                           class="option-card"
-                          :elevation="hover || selectedAnswer === option ? 3 : 1"
+                          :elevation="hover || selectedAnswer === option ? 2 : 0"
                           :class="{ 
                             'selected-option': selectedAnswer === option,
                             'disabled-option': loading 
@@ -91,7 +69,7 @@
                             <template v-slot:label>
                               <div class="option-content">
                                 <div class="option-label">
-                                  <v-chip label color="primary" text-color="white" class="option-chip">
+                                  <v-chip label color="primary" text-color="white" class="option-chip" small>
                                     {{ String.fromCharCode(65 + index) }}
                                   </v-chip>
                                 </div>
@@ -107,17 +85,15 @@
                   </v-radio-group>
 
                   <!-- Submit Button -->
-                  <div class="submit-container mt-6">
+                  <div class="submit-container">
                     <v-btn
                       @click="submitAnswer"
                       color="primary"
                       :loading="loading"
                       :disabled="!selectedAnswer || loading"
-                      large
-                      block
                       class="submit-button"
                     >
-                      <v-icon left>mdi-check</v-icon>
+                      <v-icon left small>mdi-check</v-icon>
                       Submit Answer
                     </v-btn>
                   </div>
@@ -225,16 +201,19 @@ export default {
 }
 
 .exam-panel {
-  padding: 8px;
+  padding: 4px;
+  height: 100%;
 }
 
 .exam-card {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .exam-header {
   position: relative;
-  height: 56px;
+  height: 48px;
   z-index: 1;
 }
 
@@ -248,58 +227,54 @@ export default {
 .exam-content {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 56px);
+  flex: 1;
   padding: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .question-section {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 32px 16px;
+  padding: 12px 16px;
   background-color: rgba(var(--v-primary-base), 0.02);
-  min-height: 200px;
+  flex-shrink: 0;
 }
 
 .question-text {
-  font-size: 1.25rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.4;
   color: #2c3e50;
   text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
   word-break: break-word;
-  hyphens: auto;
 }
 
 .options-section {
-  padding: 24px 16px;
-  flex-grow: 1;
+  padding: 8px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .options-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 800px;
-  margin: 0 auto;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 8px;
 }
 
 .option-card {
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-  margin-bottom: 8px !important;
-  border-radius: 12px;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  margin-bottom: 4px !important;
 }
 
 .option-content {
   display: flex;
-  align-items: flex-start;
-  padding: 12px;
-  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
 }
 
 .option-label {
@@ -307,10 +282,9 @@ export default {
 }
 
 .option-chip {
-  min-width: 28px;
-  width: 28px;
-  height: 28px !important;
-  flex-shrink: 0;
+  min-width: 24px;
+  width: 24px;
+  height: 24px !important;
   font-weight: 600;
 }
 
@@ -320,26 +294,19 @@ export default {
 }
 
 .option-text {
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.3;
   color: #2c3e50;
   word-break: break-word;
-  hyphens: auto;
 }
 
 .submit-container {
-  max-width: 800px;
-  margin: 24px auto 0;
-  padding: 0 16px;
+  padding: 8px 0;
+  flex-shrink: 0;
 }
 
 .submit-button {
   width: 100%;
-  transition: all 0.3s ease;
-}
-
-.submit-button:hover {
-  transform: translateY(-2px);
 }
 
 /* Selected and disabled states */
@@ -357,78 +324,6 @@ export default {
   cursor: not-allowed;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .question-section {
-    padding: 24px 12px;
-  }
-
-  .question-text {
-    font-size: 1.1rem;
-    line-height: 1.5;
-  }
-
-  .options-section {
-    padding: 16px 12px;
-  }
-
-  .option-content {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  .option-chip {
-    min-width: 24px;
-    width: 24px;
-    height: 24px !important;
-  }
-
-  .option-text {
-    font-size: 0.95rem;
-    line-height: 1.4;
-  }
-}
-
-@media (max-width: 420px) {
-  .exam-panel {
-    padding: 4px;
-  }
-
-  .question-section {
-    padding: 16px 8px;
-  }
-
-  .question-text {
-    font-size: 1rem;
-    line-height: 1.4;
-  }
-
-  .options-section {
-    padding: 12px 8px;
-  }
-
-  .option-content {
-    padding: 6px;
-    gap: 6px;
-  }
-
-  .option-text {
-    font-size: 0.9rem;
-    line-height: 1.35;
-  }
-
-  .option-chip {
-    min-width: 22px;
-    width: 22px;
-    height: 22px !important;
-  }
-
-  .submit-container {
-    padding: 0 8px;
-    margin-top: 16px;
-  }
-}
-
 /* Animation for timer */
 @keyframes pulse {
   0% { transform: scale(1); }
@@ -438,5 +333,13 @@ export default {
 
 .pulse-animation {
   animation: pulse 1s infinite;
+}
+
+.timer-chip {
+  margin: auto;
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 8px;
+  border: 2px solid;
 }
 </style>
