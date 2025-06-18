@@ -23,9 +23,9 @@
                   <v-spacer></v-spacer>
                   <v-chip 
                     v-if="!question?.exam?.is_audio_level"
-                    :color="timeRemaining <= 10 ? 'error' : 'white'"
+                    :color="timeRemaining <= 10 ? 'error' : 'black'"
                     :class="{ 'pulse-animation': timeRemaining <= 10 }"
-                    :text-color="timeRemaining <= 10 ? 'white' : 'primary'"
+                    :text-color="timeRemaining <= 10 ? 'black' : 'primary'"
                     class="timer-chip"
                   >
                     <v-icon left small>mdi-clock-outline</v-icon>
